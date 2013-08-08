@@ -1,19 +1,10 @@
-import fr.geocite.marius._
+/*import fr.geocite.marius._
 import fr.geocite.marius.one.zero._
 import fr.geocite.simpuzzle._
 import spray.json._
 import org.apache.commons.math3.stat.StatUtils
 
 import scala.util.Random
-
-/**
- * Created with IntelliJ IDEA.
- * User: paris
- * Date: 14/06/13
- * Time: 11:08
- * To change this template use File | Settings | File Templates.
- */
-
 
 case class XY_JSON(key: String, values: Seq[Map[String, Double]])
 
@@ -74,4 +65,44 @@ object Test extends App {
 
 
   println(m.states.toList.last.cities.map(_.population).sorted.reverse)
+}*/
+
+import fr.geocite.simpuzzle._
+import fr.geocite.marius.one.zero._
+import fr.geocite.marius._
+import util.Random
+
+object Test extends App {
+implicit val rng = new Random(42)
+
+val marius = new StepByStep with MariusInitialState with MariusStep with TimeEndingCondition with MariusFile with PowerInitialWealth {
+// Members declared in fr.geocite.marius.one.zero.MariusStep
+def adjustConsumption: Double = 0.6
+def adjustProductivity: Double = 0.3
+def capitalShareOfTaxes: Double = 0.0
+def conversionFactor: Double = 50.0
+def distanceDecay: Double = 1.0
+def distanceOrderBuy: Double = 0.6
+def distanceOrderSell: Double = 0.4
+def partnerMultiplier: Double = 8.0
+def territorialTaxes: Double = 0.4
+
+// Members declared in fr.geocite.marius.one.zero.PowerInitialWealth
+def wealthExponent: Double = 1.1
+
+// Members declared in fr.geocite.simpuzzle.TimeEndingCondition
+def maxStep: Int = 51
 }
+
+marius.states.foreach(s => println(s.step))
+
+import scalax.io._
+val output:Output = Resource.fromFile("/tmp/marius.csv")
+
+marius.states.foreach {
+s => println(s.step)
+s.cities.zipWithIndex.foreach{
+case(c, id) => output.write(s"${s.step},$id,${c.population},${c.wealth},${c.region},${c.capital},27.0\n")
+}
+}}
+
