@@ -9,9 +9,10 @@ import fr.geocite.simpuzzle._
 import fr.geocite.marius._
 import fr.geocite.marius.zero.one._
 import util.Random
-import scala.util.Try
+import spray.json._
+import DefaultJsonProtocol._
 
-object Test {
+class Marius01 {
 
   implicit val rng = new Random(42)
 
@@ -22,15 +23,15 @@ object Test {
     def maxStep: Int = 10
   }
 
-  def takeOneStep(n:Int):Seq[marius.City] = {
+  def takeOneStep(n:Int):List[Seq[marius.City]] = {
     if (marius.maxStep>n) {
-      val l=marius.states.drop(n-1).next.cities
+      val l=List(marius.states.drop(n-1).next.cities)
       l
     }
-    else List()
+    else List(List())
   }
 
-  def takeOneCity(id:String) = {
+  /*def takeOneCity(id:String):List[Seq[marius.City]] = {
     val it=marius.states
     val n=id.length
     var res=it.next.cities.filter(e=>e.okato.take(n)==id)
@@ -39,14 +40,22 @@ object Test {
       res=res++l
     }
     res
-  }
+  } */
 
-  def takeNLoopBis(n:Int,l:Seq[marius.City],):Seq[marius.City] = n match {
+  def takeNLoopBis(n:Int,l:List[Seq[marius.City]]):List[Seq[marius.City]] = n match {
     case 0 => l
-    case _ => l++takeNLoopBis(n-1,takeOneStep(marius.maxStep-1))
+    case _ => takeNLoopBis(n-1,l++takeOneStep(marius.maxStep-1))
+    //case _ => takeNLoopBis(n-1,l++List(List(n,takeOneStep(marius.maxStep-1))))
   }
 
   def takeNLoop(n:Int)=takeNLoopBis(n,List())
 
+  def sendPop(l:List[Seq[marius.City]]):List[Seq[Double]] = l.map(_.map(_.population))
 
+
+}
+
+class Test extends Marius01 {
+
+  def order(l:List[Seq[Double]]):List[Seq[Double]] = l.map(_.sortWith(_>_))
 }
