@@ -2,6 +2,9 @@ import fr.geocite.simpuzzle._
 import fr.geocite.marius.one.zero._
 import fr.geocite.marius._
 import util.Random
+import spray.json._
+import DefaultJsonProtocol._
+import java.io._
 
 implicit val rng = new Random(42)
 
@@ -18,20 +21,50 @@ val marius = new StepByStep with MariusInitialState with MariusStep with TimeEnd
   def territorialTaxes: Double = 0.4
 
   // Members declared in fr.geocite.marius.one.zero.PowerInitialWealth
-  def wealthExponent: Double = 1.1
+  def wealthExponent: Double = 1.3
 
   // Members declared in fr.geocite.simpuzzle.TimeEndingCondition
-  def maxStep: Int = 51
+  def maxStep: Int = 3
 }
 
-marius.states.foreach(s => println(s.step))
+def genJSONReal()={
+  val long=marius.startingCities.map(_(5))
+  val lat=marius.startingCities.map(_(4))
+  val okato=marius.cities.map(_.okato)
+  val pop2010=marius.startingCities.map(_(17))
 
-import scalax.io._
-val output:Output = Resource.fromFile("/tmp/marius.csv")
+  val data=(okato zip long zip lat zip pop2010).map{
+    case (((o,lo),la),pop) => List(o,lo,la,pop)
+  }
 
-marius.states.foreach {
-  s => println(s.step)
-    s.cities.zipWithIndex.foreach{
-      case(c, id) => output.write(s"${s.step},$id,${c.population},${c.wealth},${c.region},${c.capital},27.0\n")
-    }
+  val xyzMappedTable = data.map(v=>
+    //(v(0),Map[String,String]("long"->v(1),"lat"->v(2),"pop2010"->v(3)))
+    Map[String,String]("okato"->v(0),"long"->v(1),"lat"->v(2),"pop2010"->v(3))
+  ).toIndexedSeq
+
+  val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\mariusreal.js"))
+
+  writer.write("var cities_russia ="+xyzMappedTable.toJson.prettyPrint)
+
+  writer.close()
+
+  println(data.toIndexedSeq.toJson.prettyPrint)
 }
+
+def getFlows(n:Int) = {
+  val echange=marius.states.drop(n-1).next.cities.map(_.exchange)
+  val data=(marius.cities.map(_.okato) zip echange).filterNot{case(a,b)=>b.isEmpty}
+  //val data=marius.states.drop(n-1).next.cities.filterNot(c=>c.exchange.isEmpty).map(c=>List(c.okato,c.exchange))
+  val xyzMappedTable = data.map{case (v,List(w,x))=>
+  (Map[String,Seq[String]]("orig"->Seq(v),"dest"->Seq(w,x.toString)))
+  //Map[String,String]("orig"->v(0),"long"->v(1),"lat"->v(2),"pop2010"->v(3))
+  }.toIndexedSeq
+
+  val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\mariusexchange.js"))
+
+  writer.write("var cities_flows ="+xyzMappedTable.toJson.prettyPrint)
+
+  writer.close()
+}
+
+getFlows(2)

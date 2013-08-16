@@ -83,13 +83,13 @@ def genRangTaille(n:Int) = {
 
   val xyzMappedTableSimu = simu.map { v ⇒
     Map[String, Seq[Double]]("population" -> v)
-    }.toIndexedSeq
+  }.toIndexedSeq
 
   val xyzMappedTableReal = real.map { v ⇒
     Map[String, Seq[Double]]("population" -> v)
-    }.toIndexedSeq
+  }.toIndexedSeq
 
-  val writer=new PrintWriter(new File("/tmp/rangtaille.js"));
+  val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\rangtaille.js"));
 
 
   writer.write("var valeursSimu ="+xyzMappedTableSimu.toJson.prettyPrint)
@@ -121,7 +121,7 @@ def genArea(n:Int) = {
     Map[String, Seq[Double]]("population" -> v)
   }.toIndexedSeq
 
-  val writer=new PrintWriter(new File("/tmp/area.js"));
+  val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\area.js"))
 
 
   writer.write("var valeursSimu ="+xyzMappedTableSimu.toJson.prettyPrint)
@@ -131,9 +131,4 @@ def genArea(n:Int) = {
   writer.close()
 }
 
-genArea(5)
-
-
-
-
-
+genRangTaille(5)
