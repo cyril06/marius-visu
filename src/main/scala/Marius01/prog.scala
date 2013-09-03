@@ -13,6 +13,7 @@ import util.Random
 import spray.json._
 import DefaultJsonProtocol._
 import java.io._
+import math._
 
 //class Marius01 {
 
@@ -33,6 +34,15 @@ def takeOneStep(n:Int):List[Seq[marius.City]] = {
     l
   }
   else List(List())
+}
+
+def takeAllSteps():List[Seq[marius.City]] = {
+  val it=marius.states
+  var res=List(it.next.cities)
+  while (it.hasNext) {
+    res=res++List(it.next.cities)
+  }
+  res
 }
 
 def takeOneCity(id:String):List[Seq[marius.City]] = {
@@ -69,6 +79,11 @@ def order(l:List[Seq[Double]]):List[Seq[Double]] = l.map(_.sortWith(_>_))
 def round(l:List[Seq[Double]]):List[Seq[Double]] = l.map(_.map(e => (math.rint(e*100))/100))
 
 def simplify(l:List[Seq[Double]]):List[Seq[Double]] = round(order(l))
+
+def mean(l:Seq[Double]):Double = l.sum/l.length
+
+def sumProduct(l:Seq[(Double,Double)]):Double = l.map{case(x,y)=>x*y}.sum
+
 //}
 
 
@@ -81,11 +96,11 @@ def genRangTaille(n:Int) = {
   val real=simplify(getReal2010())
 
 
-  val xyzMappedTableSimu = simu.map { v ⇒
+  val xyzMappedTableSimu = simu.map { case(v) =>
     Map[String, Seq[Double]]("population" -> v)
   }.toIndexedSeq
 
-  val xyzMappedTableReal = real.map { v ⇒
+  val xyzMappedTableReal = real.map { case(v) =>
     Map[String, Seq[Double]]("population" -> v)
   }.toIndexedSeq
 
@@ -129,6 +144,13 @@ def genArea(n:Int) = {
   writer.write("var valeursReal ="+xyzMappedTableReal.toJson.prettyPrint)
 
   writer.close()
+}
+
+def genPente() = {
+  val simu=simplify(sendPop(takeAllSteps())).map(_.zipWithIndex).map(_.map{case (a,b)=>(log(a),log(b+1))})
+  val moyenne=simu.map(mean)
+
+
 }
 
 genRangTaille(5)
