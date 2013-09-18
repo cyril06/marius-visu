@@ -16,7 +16,7 @@ import java.io._
 import math._
 
 //class Marius01 {
-
+/*
 implicit val rng = new Random(42)
 
 val marius = new StepByStep with MariusInitialState with MariusStep with TimeEndingCondition with MariusFile {
@@ -154,3 +154,4 @@ def genPente() = {
 }
 
 genRangTaille(5)
+*/

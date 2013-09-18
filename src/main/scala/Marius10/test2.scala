@@ -59,33 +59,43 @@ def genJSONReal()={
 def getFlows(n:Int) = {
   val pop2010=marius.startingCities.map(_(17))
   val cities=marius.states.drop(n-1).next.cities
+
   val echangeFrom=cities.map(_.exchangeFrom)
   val echangeTo=cities.map(_.exchangeTo)
+  val nbFrom=cities.map(_.exchangeFrom).map(_.length)
+  val nbTo=cities.map(_.exchangeTo).map(_.length)
   val pop=cities.map(_.population)
   val wealth=cities.map(_.wealth)
   val totalOut=echangeFrom.map{case z =>z.map{case(a,b)=>b}}.map(_.sum)
   val totalIn=echangeTo.map{case z =>z.map{case(a,b)=>b}}.map(_.sum)
 
-  val data=(cities.map(_.okato) zip echangeFrom zip pop zip wealth zip totalOut zip totalIn zip pop2010)//filterNot{case(((a,b),c),d)=>b.isEmpty}
-  val xyzMappedTable = data.map{case ((((((v,w),x),y),z),u),t)=>
-    (Map[String,String]("orig"->v,"pop"->x.toString,"wealth"->y.toString,"totalOut"->z.toString,"totalIn"->u.toString,"total"->(u-z).toString,"pop2010"->t.toString))
-  }.toIndexedSeq
+  val citiesIndex=echangeFrom.map(_.map{case(a,b)=>(marius.cities.map(_.okato) zipWithIndex).find{case(x,y)=>x==a}.map{case(a,b)=>b}}) zipWithIndex
+  val distance=marius.distances
+  val distanceCities=citiesIndex.map{case(a,b)=>a.map{case z=>(b,z)}}.map(_.map{case(a,b)=>b.map{case z=>distance(z)(a)}})
+  val echangeFromwDist=(echangeFrom zip distanceCities).map{case (a,b)=>a zip b}.map(_.map{case (a,b)=>List(a._1,a._2)++b}).map(_.map{case a=>(a(0).toString,a(1).toString.toDouble,a(2).toString.toDouble)})
 
-  val xyzMappedTableBis = data.map{case ((((((v,w),x),y),z),u),t)=>w.map{case(x,y)=>
-    (Map[String,String]("dest"->x,"weight"->y.toString))
+  val data=(cities.map(_.okato) zip echangeFromwDist zip pop zip wealth zip totalOut zip totalIn zip pop2010 zip nbFrom zip nbTo)//filterNot{case(((a,b),c),d)=>b.isEmpty}
+  val xyzMappedTableId=cities.map(_.okato).map{case o =>
+  (Map[String,String]("okato"->o))}
+  val xyzMappedTable = data.map{case ((((((((v,w),x),y),z),u),t),s),r)=>
+    (Map[String,String]("orig"->v,"pop"->x.toString,"wealth"->y.toString,"totalOut"->z.toString,"totalIn"->u.toString,"total"->(z-u).toString,"pop2010"->t.toString,"nbFrom"->s.toString,"nbTo"->r.toString))
+  }.toIndexedSeq
+  val xyzMappedTableBis = data.map{case ((((((((v,w),x),y),z),u),t),s),r)=>w.map{case(x,y,z)=>
+    (Map[String,String]("dest"->x,"weight"->y.toString,"distance"->z.toString))
     //Map[String,String]("orig"->v(0),"long"->v(1),"lat"->v(2),"pop2010"->v(3))
   }}.toIndexedSeq
+  //val xyzMappedTableGen=Map[String,Seq[Map[String,String]]]("id"->xyzMappedTableId,"nodes"->xyzMappedTable,"links"->xyzMappedTableBis)
 
   val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\mariusexchange.js"))
 
   writer.write("var cities_flows ="+(xyzMappedTable zip xyzMappedTableBis).toJson.prettyPrint)
-
+  //writer.write("var cities_flows ="+xyzMappedTableGen.toJson.prettyPrint)
   writer.write("\n")
 
   val dataGenTablePop=Map[String,Double]("mean"->mean(pop),"min"->pop.min,"max"->pop.max)
   val dataGenTableWealth=Map[String,Double]("mean"->rint(mean(wealth)*100)/100,"min"->rint(wealth.min*100)/100,"max"->rint(wealth.max*100)/100)
 
-  val notNullFlow=data.map{case ((((((v,w),x),y),z),u),t)=>w.map{case(x,y)=>y}}.filterNot{case a=>a.isEmpty}.flatten
+  val notNullFlow=data.map{case ((((((((v,w),x),y),z),u),t),s),r)=>w.map{case(x,y,z)=>y}}.filterNot{case a=>a.isEmpty}.flatten
   val meanFlow=rint(mean(notNullFlow)*100)/100
   val minFlow=rint(notNullFlow.min*100)/100
   val maxFlow=rint(notNullFlow.max*100)/100
@@ -109,13 +119,15 @@ def getFlows(n:Int) = {
 
   val dataGenTableFlow=Map[String,Double]("nb"->notNullFlow.length,"mean"->meanFlow,"min"->minFlow,"max"->maxFlow,"q1"->q1Flow,"q3"->q3Flow,"median"->medianFlow)
 
-  val dataGenTable=Map[String,Map[String,Double]]("pop"->dataGenTablePop,"wealth"->dataGenTableWealth,"flow"->dataGenTableFlow,"total"->dataGenTableTotal)
+  val dataGenTableExchange=Map[String,Double]("nbmax"->(nbFrom zip nbTo).map{case (a,b)=>a+b}.max,"maxSumIn"->totalIn.max,"maxSumOut"->totalOut.max)
+
+  val dataGenTable=Map[String,Map[String,Double]]("pop"->dataGenTablePop,"wealth"->dataGenTableWealth,"flow"->dataGenTableFlow,"exchange"->dataGenTableExchange,"commercial"->dataGenTableTotal)
   writer.write("var dataGen="+dataGenTable.toJson.prettyPrint)
 
   writer.write("\n")
 
-  val popCitiesPos=data.map{case ((((((v,w),x),y),z),u),t)=>(x,u-z)}.filter{case (a,b)=>b>0}.map{case(a,b)=>a}.sortWith(_<_)
-  val popCitiesNeg=data.map{case ((((((v,w),x),y),z),u),t)=>(x,u-z)}.filter{case (a,b)=>b<0}.map{case(a,b)=>a}.sortWith(_<_)
+  val popCitiesPos=data.map{case ((((((((v,w),x),y),z),u),t),s),r)=>(x,z-u)}.filter{case (a,b)=>b>0}.map{case(a,b)=>a}.sortWith(_<_)
+  val popCitiesNeg=data.map{case ((((((((v,w),x),y),z),u),t),s),r)=>(x,z-u)}.filter{case (a,b)=>b<0}.map{case(a,b)=>a}.sortWith(_<_)
   val meanCitiesPos=rint(mean(popCitiesPos)*100)/100
   val meanCitiesNeg=rint(mean(popCitiesNeg)*100)/100
   val q1Pos=rint(popCitiesPos(ceil(popCitiesPos.length/4.0).toInt)*100)/100
