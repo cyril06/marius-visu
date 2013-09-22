@@ -66,8 +66,7 @@ def genJSONReal()={
   println(data.toIndexedSeq.toJson.prettyPrint)
 }
 
-def getFlows(n:Int) = {
-
+def getFlows(n:Int,text:String) = {
   val pop2010=marius.startingCities.map(_(17))
   val cities=marius.states.drop(n-1).next.value.cities
 
@@ -98,6 +97,10 @@ def getFlows(n:Int) = {
   //val xyzMappedTableGen=Map[String,Seq[Map[String,String]]]("id"->xyzMappedTableId,"nodes"->xyzMappedTable,"links"->xyzMappedTableBis)
 
   val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\mariusexchange.js"))
+
+  val dataGenTableHeader=Map[String,String]("version"->text,"totalStep"->marius.maxStep.toString,"step"->n.toString,"oneStep"->"1","yearBegin"->"1959","yearEnd"->"2010")
+  writer.write("var header="+dataGenTableHeader.toJson.prettyPrint)
+  writer.write("\n")
 
   writer.write("var cities_flows ="+(xyzMappedTable zip xyzMappedTableBis).toJson.prettyPrint)
   //writer.write("var cities_flows ="+xyzMappedTableGen.toJson.prettyPrint)
@@ -160,7 +163,7 @@ def getFlows(n:Int) = {
     println((s.value.cities.map(_.population).sum))
   }
 
-//getFlows(3)
+//getFlows(3,"Marius10")
 
 //genJSONReal()
 
