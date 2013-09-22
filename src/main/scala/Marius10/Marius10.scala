@@ -1,3 +1,5 @@
+package fr.geocite.mariusvisu.Marius10
+
 import fr.geocite.simpuzzle._
 import fr.geocite.marius.one.zero._
 import fr.geocite.marius._
@@ -7,9 +9,17 @@ import DefaultJsonProtocol._
 import java.io._
 import math._
 
+object Marius10 extends App {
+
 implicit val rng = new Random(42)
 
-val marius = new StepByStep with MariusInitialState with MariusStep with TimeEndingCondition with MariusFile with PowerInitialWealth {
+val marius = new StepByStep
+  with MariusInitialState
+  with MariusStep
+  with TimeEndingCondition
+  with MariusFile
+  with PowerInitialWealth
+  {
   // Members declared in fr.geocite.marius.one.zero.MariusStep
   def adjustConsumption: Double = 0.6
   def adjustProductivity: Double = 0.3
@@ -32,13 +42,13 @@ def mean(l:Seq[Double]):Double = l.sum/l.length
 def median(l:Seq[Double]):Double = if (l.length%2==1) l((l.length+1)/2) else mean(List(l(l.length/2),l(l.length/2+1)))
 
 def genJSONReal()={
-  val long=marius.startingCities.map(_(5))
-  val lat=marius.startingCities.map(_(4))
+  val long=marius.startingCities.map(_(5)).toList
+  val lat=marius.startingCities.map(_(4)).toList
   val okato=marius.cities.map(_.okato)
-  val pop2010=marius.startingCities.map(_(17))
-  val name=marius.startingCities.map(_(1))
+  val pop2010=marius.startingCities.map(_(17)).toList
+  val name=marius.startingCities.map(_(1)).toList
 
-  val data=(okato zip long zip lat zip pop2010 zip name).map{
+  val data=(okato.toList zip long zip lat zip pop2010 zip name).map{
     case ((((o,lo),la),pop),na) => List(o,lo,la,pop,na)
   }
 
@@ -57,8 +67,9 @@ def genJSONReal()={
 }
 
 def getFlows(n:Int) = {
+
   val pop2010=marius.startingCities.map(_(17))
-  val cities=marius.states.drop(n-1).next.cities
+  val cities=marius.states.drop(n-1).next.value.cities
 
   val echangeFrom=cities.map(_.exchangeFrom)
   val echangeTo=cities.map(_.exchangeTo)
@@ -145,6 +156,12 @@ def getFlows(n:Int) = {
   writer.close()
 }
 
-getFlows(3)
+  for{ s <- marius.states.take(2) }{
+    println((s.value.cities.map(_.population).sum))
+  }
+
+//getFlows(3)
 
 //genJSONReal()
+
+}

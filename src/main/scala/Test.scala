@@ -16,7 +16,7 @@ class Marius01 {
 
   implicit val rng = new Random(42)
 
-  val marius = new StepByStep with MariusInitialState with MariusStep with TimeEndingCondition with MariusFile {
+  val marius = new StepByStep with MariusInitialState with MariusStep with TimeEndingCondition with MariusFile{
     def hydrocarbonBonus: Double = 0.01
     def rate: Double = 0.01
     def stdRate: Double = 0.005
@@ -25,7 +25,7 @@ class Marius01 {
 
   def takeOneStep(n:Int):List[Seq[marius.City]] = {
     if (marius.maxStep>n) {
-      val l=List(marius.states.drop(n-1).next.cities)
+      val l=List(marius.states.drop(n-1).next.value.cities)
       l
     }
     else List(List())
