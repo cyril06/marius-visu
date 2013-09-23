@@ -4,6 +4,7 @@ import fr.geocite.simpuzzle._
 import fr.geocite.simpoplocal._
 
 import rng._
+import scala.collection.mutable.ListBuffer
 
 object Simpop extends App {
 
@@ -25,11 +26,14 @@ object Simpop extends App {
     def maxInnovation: Double = 10000
   }
 
-  for{ s <- m.states.take(100) }{
-    println(s.written)
+  for{ s <- m.states.take(5) }{
+    s.written.map{
+      case a: m.Diffused => println(" from " + a.from + " to " + a.to)
+      //case b: m.Created => println(" in " + b.in)
+      case _ =>
+    }
+
     println((s.value.settlements.map(_.population).sum))
   }
-
-
 }
 
