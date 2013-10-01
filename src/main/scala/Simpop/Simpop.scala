@@ -1,4 +1,4 @@
-/*package fr.geocite.mariusvisu.Simpop
+package fr.geocite.mariusvisu.Simpop
 
 import fr.geocite.simpuzzle._
 import fr.geocite.simpoplocal._
@@ -86,4 +86,3 @@ object Simpop extends App {
   writer2.close()
 
 }
- */
