@@ -30,8 +30,7 @@ import math._
   def maxInnovation: Double = 10000
 }*/
 
-val myseed: Long = 6863419716327549772L
-implicit val rng= new Random(myseed)
+implicit val rng= new Random(-6863419716327549772L)
 
 val m = new StepByStep with SimpopLocalInitialState with SimpopLocalStep with SimpopLocalTimeInnovationEndingCondition  {
 
@@ -116,6 +115,7 @@ def getFlows(n:Int,text:String) = { //n est le nombre approximatif de steps -> u
     ressources= stateCurrent.value.settlements.map(_.availableResource)
     if (cpt%mult==0) {popTotal=popTotal++List(pop)}
     cpt=cpt+1
+    println(cpt)
   }
 
   val writer=new PrintWriter(new File("/home/paris/simpopexchange.js"))
