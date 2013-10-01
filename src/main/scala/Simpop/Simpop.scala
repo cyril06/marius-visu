@@ -1,4 +1,4 @@
-package fr.geocite.mariusvisu.Simpop
+/*package fr.geocite.mariusvisu.Simpop
 
 import fr.geocite.simpuzzle._
 import fr.geocite.simpoplocal._
@@ -11,6 +11,8 @@ object Simpop extends App {
   import fr.geocite.simpuzzle._
   import fr.geocite.simpoplocal._
   import rng._
+
+  implicit val rng = new Random(42)
 
   val m = new StepByStep with SimpopLocalInitialState with SimpopLocalStep with SimpopLocalTimeInnovationEndingCondition  {
     // Members declared in fr.geocite.simpoplocal.SimpopLocalInitialState
@@ -36,4 +38,4 @@ object Simpop extends App {
     println((s.value.settlements.map(_.population).sum))
   }
 }
-
+ */

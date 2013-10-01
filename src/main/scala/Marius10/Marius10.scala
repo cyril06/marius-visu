@@ -9,6 +9,7 @@ import DefaultJsonProtocol._
 import java.io._
 import math._
 
+
 object Marius10 extends App {
 
 implicit val rng = new Random(42)
@@ -54,12 +55,12 @@ def genJSONReal()={
 
   val xyzMappedTable = data.map(v=>
     //(v(0),Map[String,String]("long"->v(1),"lat"->v(2),"pop2010"->v(3)))
-    Map[String,String]("okato"->v(0),"long"->v(1),"lat"->v(2),"pop2010"->v(3),"name"->v(4))
+    Map[String,String]("id"->v(0),"long"->v(1),"lat"->v(2),"pop2010"->v(3),"name"->v(4))
   ).toIndexedSeq
 
   val writer=new PrintWriter(new File("C:\\wamp\\www\\Vizu\\files\\mariusreal.js"))
 
-  writer.write("var cities_russia ="+xyzMappedTable.toJson.prettyPrint)
+  writer.write("var cities ="+xyzMappedTable.toJson.prettyPrint)
 
   writer.close()
 
