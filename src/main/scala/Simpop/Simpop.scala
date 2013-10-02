@@ -14,8 +14,6 @@ object Simpop extends App {
 
   implicit val rng = new Random(-6863419716327549772L)
 
-  implicit val rng = new Random(42)
-
   val m = new StepByStep with SimpopLocalInitialState with SimpopLocalStep with SimpopLocalTimeInnovationEndingCondition  {
     def distanceDecay: Double = 0.6882107473716844
     def innovationImpact: Double = 0.007879556611500305
