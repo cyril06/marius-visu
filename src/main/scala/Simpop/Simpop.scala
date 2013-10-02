@@ -27,44 +27,47 @@ object Simpop extends App {
 
   // PREMIER CSV
 
-  val file = folderPath + "CreatedCumulatedByStep.csv"
-  val writer = new BufferedWriter(new FileWriter(new File(file)))
-
-
-  try{
-    writer.append("created, diffused" + "\n")
-  }
-
-  //Premiere sortie innov
-  for{ s <- m.states }{
-    val diffusedByState = s.written.filter{
-      case b: m.Diffused  => true
-      case _ => false
-    }.toSeq
-    val createdByState = s.written.filter{
-      case b: m.Created  => true
-      case _ => false
-    }.toSeq
-
-    try {
-      writer.append(createdByState.size + " , " + diffusedByState.size + "\n")
-    }
-  }
-  writer.close()
+//  val file = folderPath + "CreatedCumulatedByStep.csv"
+//  val writer = new BufferedWriter(new FileWriter(new File(file)))
+//
+//
+//  try{
+//    writer.append("created, diffused" + "\n")
+//  }
+//
+//  //Premiere sortie innov
+//  for{ s <- m.states }{
+//    val diffusedByState = s.written.filter{
+//      case b: m.Diffused  => true
+//      case _ => false
+//    }.toSeq
+//    val createdByState = s.written.filter{
+//      case b: m.Created  => true
+//      case _ => false
+//    }.toSeq
+//
+//    try {
+//      writer.append(createdByState.size + " , " + diffusedByState.size + "\n")
+//    }
+//  }
+//  writer.close()
 
   // DEUXIEME CSV
-  val listInnovCreated:List[List[m.Created]] = m.states.map{ s =>
-    s.written.collect { case a:m.Created => a }.toList
+  val listInnov:List[(List[m.Created],List[m.Diffused])]= m.states.map{ s =>
+    println(s.value.step)
+    (s.written.collect { case a:m.Created => a }.toList,
+    s.written.collect { case a:m.Diffused => a }.toList)
     }.toList
-  println("size  = " + listInnovCreated.flatten.size)
-  val sizeListCreated = listInnovCreated.flatten.groupBy{_.in}.mapValues(_.size)
+
+  val listCreated = listInnov.map{ case (a,b) => a}
+  val listDiffused = listInnov.map{ case (a,b) => b}
+
+  println("size  = " + listCreated.flatten.size)
+  val sizeListCreated = listCreated.flatten.groupBy{_.in}.mapValues(_.size)
   val sortedListCreated = sizeListCreated.toSeq.sortBy(_._1)
 
-  val listInnovDiffused:List[List[m.Diffused]] = m.states.map{ s =>
-    s.written.collect { case a:m.Diffused => a }.toList
-  }.toList
-  println("size  = " + listInnovDiffused.flatten.size)
-  val sizeListDiffused = listInnovDiffused.flatten.groupBy{_.from}.mapValues(_.size)
+  println("size  = " + listDiffused.flatten.size)
+  val sizeListDiffused = listDiffused.flatten.groupBy{_.from}.mapValues(_.size)
   val sortedListDiffused = sizeListDiffused.toSeq.sortBy(_._1)
 
   val file2 = folderPath + "CreatedCumulatedAllStep.csv"
