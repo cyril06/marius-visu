@@ -12,8 +12,6 @@ object Simpop extends App {
   import fr.geocite.simpuzzle._
   import fr.geocite.simpoplocal._
 
-  implicit val rng = new Random(-6863419716327549772L)
-
   val m = new StepByStep with SimpopLocalInitialState with SimpopLocalStep with SimpopLocalTimeInnovationEndingCondition  {
     def distanceDecay: Double = 0.6882107473716844
     def innovationImpact: Double = 0.007879556611500305
@@ -27,34 +25,34 @@ object Simpop extends App {
 
   // PREMIER CSV
 
-//  val file = folderPath + "CreatedCumulatedByStep.csv"
-//  val writer = new BufferedWriter(new FileWriter(new File(file)))
-//
-//
-//  try{
-//    writer.append("created, diffused" + "\n")
-//  }
-//
-//  //Premiere sortie innov
-//  for{ s <- m.states }{
-//    val diffusedByState = s.written.filter{
-//      case b: m.Diffused  => true
-//      case _ => false
-//    }.toSeq
-//    val createdByState = s.written.filter{
-//      case b: m.Created  => true
-//      case _ => false
-//    }.toSeq
-//
-//    try {
-//      writer.append(createdByState.size + " , " + diffusedByState.size + "\n")
-//    }
-//  }
-//  writer.close()
+  val file = folderPath + "CreatedCumulatedByStep.csv"
+  val writer = new BufferedWriter(new FileWriter(new File(file)))
+
+  try{
+    writer.append("created, diffused" + "\n")
+  }
+
+  //Premiere sortie innov
+  for{ s <- m.states(new Random(-6863419716327549772L)) }{
+    val diffusedByState = s.written.filter{
+      case b: m.Diffused  => true
+      case _ => false
+    }.toSeq
+    val createdByState = s.written.filter{
+      case b: m.Created  => true
+      case _ => false
+    }.toSeq
+
+    try {
+      writer.append(createdByState.size + " , " + diffusedByState.size + "\n")
+    }
+  }
+  writer.close()
+
 
   // DEUXIEME CSV
-  val listInnov:List[(List[m.Created],List[m.Diffused])]= m.states.map{ s =>
-    println(s.value.step)
+  val listInnov:List[(List[m.Created],List[m.Diffused])]= m.states(new Random(-6863419716327549772L)).map{ s =>
+    println(s.value.step + " > " + s.value.currentInnovationId )
     (s.written.collect { case a:m.Created => a }.toList,
     s.written.collect { case a:m.Diffused => a }.toList)
     }.toList
